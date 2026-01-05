@@ -1,0 +1,43 @@
+#!/bin/bash
+
+file="$1"
+
+#1.Port (de preferat sa nu fie cel default adica 22)
+
+#cautam ultima linie care incepe cu Port si ii pastram valoarea
+port=$(grep "^Port" "$file" | tail -n 1 | awk '{print $2}')
+
+#verificam daca portul este default
+if [ "$port" == "22" ]; then
+	echo -e "[WARNING]  Este setat un port default.\nRecomandat: schimbati pe un port custom"
+else
+	echo -e "[OK] Este setat un port custom"
+fi
+
+#2.PermitRootLogin (trebuie sa fie no)
+
+#cautam ultima linie care incepe cu PermitRootLogin si ii pastram valoarea
+root_login=$(grep "^PermitRootLogin" "$file" | tail -n 1 | awk '{print $2}')
+
+#verificam daca PermitRootLogin este activ
+if [ "$root_login" == "no" ]; then
+	echo "[OK] Accesul prin root este dezactivat"
+elif [ -z "$root_login" ]; then
+	echo -e "[WARNING] Accesul prin root  nu este setat! Se foloseste valoarea default.\nRecomandat: setati accesul prin root la 'no'" 
+else
+	echo -e "[ALERT] Accesul prin root este permis! Securitate slaba!\nUrgent: dezactivati accesul prin root"
+fi
+
+#3.PasswordAuthentication (trebuie sa fie no)
+
+#cautam ultima linie care incepe cu PasswordAuthentication si ii pastram valoarea
+pass_auth=$(grep "^PasswordAuthentication" "$file" | tail -n 1 | awk '{print $2}')
+
+#verificam daca PasswordAuthentication este activ
+if [ "$pass_auth" == "no" ]; then
+        echo "[OK] Autentificarea prin parola este dezactivata"
+elif [ -z "$pass_auth" ]; then
+        echo -e "[WARNING] Autentificarea prin parola nu este setata! Se foloseste valoarea default.\nRecomandat: setati autentificarea prin parola la 'no'" 
+else
+        echo -e "[ALERT] Autentificarea prin parola este permisa! Securitate slaba!\nUrgent: dezactivati autentificarea prin parola"
+fi
