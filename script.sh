@@ -7,8 +7,10 @@ if [ "$#" -ne 1 ]; then
 	exit 1
 fi
 
+
 #Preluare argument
 file="$1"
+
 
 #Verificare existenta fisier
 echo "Verifying file existance: "
@@ -19,6 +21,7 @@ else
 	echo "File exists."
 fi
 echo
+
 
 #Verificare permisiuni
 echo "Verifying file permissions: "
@@ -57,3 +60,16 @@ if (( others & 1 )); then
 	echo "Warning! Others can execute the file."
 	exit 1
 fi
+echo
+
+
+#Eliminare linii vide
+#1. linii complet goale
+sed -i '/^$/d' "$file"
+
+#2. linii care contin doar spatii sau tab-uri
+sed -i -E '/^[[:space:]]+$/d' "$file"
+
+
+#Eliminare comentarii
+
