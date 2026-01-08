@@ -60,7 +60,6 @@ if (( others & 1 )); then
 	echo "Warning! Others can execute the file."
 	exit 1
 fi
-echo
 
 
 #Eliminare linii vide
@@ -72,4 +71,4 @@ sed -i -E '/^[[:space:]]+$/d' "$file"
 
 
 #Eliminare comentarii
-
+sed -i -E '/^[[:space:]]*#/d' "$file"
