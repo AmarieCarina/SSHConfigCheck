@@ -29,36 +29,34 @@ echo "Verifying file permissions: "
 if [ -x "$file" ]; then
 	echo "All good, executable file."
 else
-	echo "Warning! Unexecutable file." >&2
+	echo "ERROR: Unexecutable file." >&2
 	exit 1
 fi
 
 if [ -r "$file" ]; then
 	echo "All good, readable file."
 else
-	echo "Warning! Unreadable file." >&2
+	echo "ERROR: Unreadable file." >&2
 	exit 1
 fi
 
 if [ -w "$file" ]; then
 	echo "All good, writable file."
 else
-	echo "Warning! Unwritable file." >&2
+	echo "ERROR: Unwritable file." >&2
+	exit 1
 fi
 
 perm=$(stat -c "%a" "$file")
 others=${perm: -1}
 if (( others & 4 )); then
 	echo "Warning! Others can read the file." >&2
-	exit 1
 fi
 if (( others & 2 )); then
 	echo "Warning! Others can write to the file." >&2
-	exit 1
 fi
 if (( others & 1 )); then
 	echo "Warning! Others can execute the file." >&2
-	exit 1
 fi
 
 
@@ -69,7 +67,7 @@ sed -i '/^$/d' "$file"
 #2. linii care contin doar spatii sau tab-uri
 sed -i -E '/^[[:space:]]+$/d' "$file"
 
-#Eliminare comentarii
+#Ignorare comentarii
 sed '/^[[:space:]]*#/d' "$file" > /dev/null
 
 
