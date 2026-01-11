@@ -74,7 +74,7 @@ flag=0
 while read -r line
 do
 	((crtLine++))
-	key="${line%%:*}" # linia curenta, separata dupa : => cheia
+	key=$(awk '{print $1}' <<< "$line") # linia curenta, separata dupa spatiu => cheia
 	if [[ -n "${seen[$key]}" ]]; then
 		echo "Warning! Option ${key} is overwritten on lines ${seen[$key]} and ${crtLine}" >&2
 		flag=1
