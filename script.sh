@@ -10,12 +10,12 @@ fi
 
 
 #Preluare argument
-file="$1"
+rawfile="$1"
 
 
 #Verificare existenta fisier
 echo "Verifying file existance: "
-if [ ! -f "$file" ]; then
+if [ ! -f "$rawfile" ]; then
 	echo "ERROR: No configuration file provided." >&2
 	exit 1
 else
@@ -26,28 +26,20 @@ echo
 
 #Verificare permisiuni
 echo "Verifying file permissions: "
-if [ -x "$file" ]; then
-	echo "All good, executable file."
-else
-	echo "ERROR: Unexecutable file." >&2
-	exit 1
-fi
-
-if [ -r "$file" ]; then
+if [ -r "$rawfile" ]; then
 	echo "All good, readable file."
 else
 	echo "ERROR: Unreadable file." >&2
 	exit 1
 fi
 
-if [ -w "$file" ]; then
+if [ -w "$rawfile" ]; then
 	echo "All good, writable file."
 else
-	echo "ERROR: Unwritable file." >&2
-	exit 1
+	echo "Warning: Unwritable file."
 fi
 
-perm=$(stat -c "%a" "$file")
+perm=$(stat -c "%a" "$rawfile")
 others=${perm: -1}
 if (( others & 4 )); then
 	echo "Warning! Others can read the file." >&2
@@ -62,13 +54,14 @@ fi
 
 #Eliminare linii vide
 #1. linii complet goale
-sed -i '/^$/d' "$file"
+sed -i '/^$/d' "$rawfile"
 
 #2. linii care contin doar spatii sau tab-uri
-sed -i -E '/^[[:space:]]+$/d' "$file"
+sed -i -E '/^[[:space:]]+$/d' "$rawfile"
 
 #Ignorare comentarii
-sed '/^[[:space:]]*#/d' "$file" > /dev/null
+file=$(mktemp)
+sed '/^[[:space:]]*#/d' "$rawfile" > "$file"
 
 
 #Identificare optiuni suprascrise
@@ -83,7 +76,6 @@ do
 	((crtLine++))
 	key="${line%%:*}" # linia curenta, separata dupa : => cheia
 	if [[ -n "${seen[$key]}" ]]; then
-		echo
 		echo "Warning! Option ${key} is overwritten on lines ${seen[$key]} and ${crtLine}" >&2
 		flag=1
 	else
@@ -94,12 +86,13 @@ if (( flag == 0 )); then
 	echo "No overwritten options found."
 fi
 
-
-
-
+echo
+echo "Options available:"
+cat "$file"
 #Verificare optiuni de securitate
 
-
+echo
+echo
 #1.Port (de preferat sa nu fie cel default adica 22)
 
 #cautam ultima linie care incepe cu Port
@@ -158,7 +151,8 @@ if [ -n "$linie_pass_auth" ]; then
 	pass_auth=$(echo "$linie_pass_auth" | awk '{print $2}')
 
 	if [ -z "$pass_auth" ]; then
-        	echo "[ALERT] PasswordAuthentication is not set! Default value 'yes' is being used.\nCritical: set PasswordAuthentication to 'no'." >&2
+        	echo "[ALERT] PasswordAuthentication is not set! Default value 'yes' is being used." >&2
+		echo "Critical: set PasswordAuthentication to 'no'." >&2
 	elif [ "$pass_auth" == "no" ]; then
         	echo  "[OK] PasswordAuthentication is set to 'no'."
 	else
@@ -210,3 +204,4 @@ if [ -n "$linie_max_tries" ]; then
 	else
 		echo -e "[ALERT]  MaxAuthTries is way too high. Compromised security!\nCritical: set MaxAuthTries to no more than 4." >&2
 	fi
+fi
